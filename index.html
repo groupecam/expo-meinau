@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus CAM : La rénovation de La Meinau.</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: #f0f0f0;
+    overflow: hidden;
+  }
+
+  .brochure-wrapper {
+    position: relative;
+    width: 1190.552px;
+    height: 841.89px;
+    perspective: 2000px;
+  }
+
+  .pages-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+  }
+
+  .page.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: rotateY(0deg);
+    z-index: 10;
+  }
+
+  .page.prev {
+    opacity: 0;
+    transform: rotateY(-20deg) translateX(-100px);
+    z-index: 5;
+  }
+
+  .page.next {
+    opacity: 0;
+    transform: rotateY(20deg) translateX(100px);
+    z-index: 5;
+  }
+
+  .nav-controls {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background: #283c55;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    padding: 0;
+    line-height: 20px;
+    text-align: center;
+  }
+
+  .nav-btn:hover {
+    background: #fabe69;
+    transform: scale(1.1);
+  }
+
+  .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: scale(1);
+  }
+
+  .nav-prev { left: -70px; }
+  .nav-next { right: -70px; }
+
+  .page-indicator {
+    position: absolute;
+    bottom: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #283c55;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 16px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .global-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+  }
+
+  .global-loader.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .loader-spinner {
+    width: 60px;
+    height: 60px;
+    border: 5px solid rgba(40, 60, 85, 0.2);
+    border-top: 5px solid #283c55;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  .loader-text {
+    margin-top: 20px;
+    color: #283c55;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .static-page {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* PAGE 2 */
+  .page2-bg { width: 100%; height: 100%; display: block; }
+  .page2-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.10);
+    display: none;
+    z-index: 4;
+  }
+  .page2-overlay.active { display: block; }
+  .page2-hotspot {
+    position: absolute;
+    width: 58.448px;
+    height: 58.448px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    left: 1121.276px;
+    top: 695.721px;
+    z-index: 5;
+  }
+  .page2-popup {
+    position: absolute;
+    width: 553.412px;
+    height: 202.254px;
+    top: 600px;
+    left: 100%;
+    transition: transform 0.5s ease;
+    z-index: 10;
+  }
+  .page2-popup.active { transform: translateX(-553.412px); }
+  .page2-popup img { width: 100%; height: 100%; display: block; }
+
+  /* PAGE 3 */
+  .page3-container { display: flex; width: 100%; height: 100%; }
+  .column-wrapper { flex: 1; position: relative; }
+  .column-wrapper img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.2s ease-in-out;
+  }
+  .point {
+    position: absolute;
+    width: 22.402px;
+    height: 22.402px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 1px solid #64BECd;
+    opacity: 0;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .point.yellow {
+    border: 2px solid #ffa500;
+    background-color: #f4f3f5;
+  }
+  .point:hover, .point.active {
+    opacity: 1;
+    transform: scale(1.1);
+    box-shadow: 0 0 4px #64BECd;
+  }
+  .point.yellow:hover, .point.yellow.active {
+    box-shadow: 0 0 8px #ffa500;
+  }
+  .confetti {
+    position: absolute;
+    width: 6px; height: 6px;
+    background: #ffa500;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 20;
+    opacity: 0;
+    animation: confetti-fall 1.5s ease-out forwards;
+  }
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(40px) translateX(var(--random-x)) rotate(360deg) scale(0.3); }
+  }
+  .page3-popup {
+    position: absolute;
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    overflow: hidden;
+  }
+  .page3-popup.active { opacity: 1; pointer-events: auto; }
+  .page3-popup img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .page3-popup.slide-from-left { transform: translateX(-100%); }
+  .page3-popup.slide-from-left.active { transform: translateX(0); }
+  .page3-popup.slide-from-right { transform: translateX(100%); }
+  .page3-popup.slide-from-right.active { transform: translateX(0); }
+
+  /* PAGE 4 */
+  .page4-bg { width: 100%; height: 100%; background-size: cover; background-position: center; }
+  .invisible-btn {
+    position: absolute;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    z-index: 5;
+  }
+  .page4-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(40, 60, 85, 0.15);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 4;
+  }
+  .page4-overlay.active { opacity: 1; pointer-events: auto; }
+  .page4-popup {
+    position: absolute;
+    background-size: cover;
+    background-position: center;
+    transform: translateX(-120%);
+    transition: transform 0.4s ease;
+    z-index: 10;
+  }
+  .page4-popup.active { transform: translateX(0); }
+
+  /* PAGE 6 */
+  .page6-bg {
+    width: 100%; height: 100%;
+    background: url("assets/page6/page6.png") no-repeat center;
+    background-size: cover;
+    position: relative;
+  }
+  
+  .hover-zone {
+    position: absolute;
+    width: 342.697px;
+    height: 208.656px;
+    cursor: pointer;
+    z-index: 5;
+  }
+  
+  .hover-image {
+    position: absolute;
+    width: 342.697px;
+    height: 208.656px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 4;
+  }
+  
+  .hover-zone:hover + .hover-image {
+    opacity: 1;
+  }
+  
+  .page6-popup {
+    position: absolute;
+    display: none;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  
+  .page6-popup.active {
+    display: block;
+    opacity: 1;
+  }
+  
+  .page6-popup img {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  
+  .popup-button {
+    position: absolute;
+    cursor: pointer;
+    z-index: 101;
+    transition: opacity 0.2s ease;
+  }
+
+  .popup-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+    z-index: 11;
+    transition: all 0.2s ease;
+  }
+  .popup-close:hover {
+    background: rgba(255,255,255,1);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="global-loader" id="globalLoader">
+  <div class="loader-spinner"></div>
+  <div class="loader-text">L'histoire se prépare...</div>
+</div>
+
+<div class="brochure-wrapper">
+  <div class="pages-container">
+    
+    <div class="page active static-page" id="page1" style="background-image: url('assets/page1/page1.png');"></div>
+
+    <div class="page" id="page2">
+      <img src="assets/page2/page2.png" class="page2-bg">
+      <div class="page2-overlay" id="p2Overlay"></div>
+      <button class="page2-hotspot" id="p2Hotspot"></button>
+      <div class="page2-popup" id="p2Popup">
+        <img src="assets/page2/pop up 1.png">
+        <button class="popup-close">&times;</button>
+      </div>
+    </div>
+
+    <div class="page" id="page3">
+      <div class="page3-container">
+        <div class="column-wrapper" id="col1"><img src="assets/page3/page3-coln1.png"></div>
+        <div class="column-wrapper" id="col2"><img src="assets/page3/page3-coln2.png"></div>
+        <div class="column-wrapper" id="col3"><img src="assets/page3/page3-coln3.png"></div>
+
+        <div class="point" data-col="col1" data-popup="pp1" style="top:353.307px; left:98.951px;"></div>
+        <div class="point" data-col="col1" data-popup="pp2" style="top:386.968px; left:283.587px;"></div>
+        <div class="point" data-col="col2" data-popup="pp3" style="top:370.414px; left:474.615px;"></div>
+        <div class="point" data-col="col2" data-popup="pp4" style="top:411.219px; left:605.5px;"></div>
+        <div class="point" data-col="col2" data-popup="pp5" style="top:362.109px; left:722.081px;"></div>
+        <div class="point" data-col="col3" data-popup="pp6" style="top:407.066px; left:837.1px;"></div>
+        <div class="point" data-col="col3" data-popup="pp7" style="top:400.475px; left:948.154px;"></div>
+        <div class="point yellow" data-col="col3" data-popup="pp8" style="top:346.716px; left:1065.073px;"></div>
+
+        <div id="pp1" class="page3-popup slide-from-left" style="left:0; top:482.213px; width:607.331px; height:307.094px;">
+          <img src="assets/page3/page3-popup1.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp2" class="page3-popup slide-from-left" style="left:0; top:489.031px; width:743.276px; height:241px;">
+          <img src="assets/page3/page3-popup2.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp3" class="page3-popup slide-from-left" style="left:0; top:524.83px; width:720.276px; height:143.083px;">
+          <img src="assets/page3/page3-popup3.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp4" class="page3-popup slide-from-right" style="left:440.276px; top:500.736px; width:750.276px; height:278.335px;">
+          <img src="assets/page3/page3-popup4.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp5" class="page3-popup slide-from-right" style="left:440.276px; top:500.736px; width:750.276px; height:245.76px;">
+          <img src="assets/page3/page3-popup5.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp6" class="page3-popup slide-from-right" style="left:36px; top:516.512px; width:1154.552px; height:290.417px;">
+          <img src="assets/page3/page3-popup6.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp7" class="page3-popup slide-from-right" style="left:425px; top:582.197px; width:765.552px; height:120px;">
+          <img src="assets/page3/page3-popup7.png"><button class="popup-close">&times;</button>
+        </div>
+        <div id="pp8" class="page3-popup slide-from-right" style="left:0; top:514.496px; width:1191.323px; height:291.394px;">
+          <img src="assets/page3/page3-popup8.png"><button class="popup-close">&times;</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page4">
+      <div class="page4-bg" style="background-image: url('assets/page4/page4.png');"></div>
+      <div class="page4-overlay" id="p4Overlay"></div>
+      <button class="invisible-btn" id="btnDb" style="left:630.315px; top:366.527px; width:129.37px; height:15.186px;"></button>
+      <button class="invisible-btn" id="btnVisite" style="left:1058.81px; top:791.291px; width:110.836px; height:26.362px;"></button>
+      <div class="page4-popup" id="popDb" style="left:0; top:166.413px; width:610px; height:254.942px; background-image:url('assets/page4/page4-db.png');">
+        <button class="popup-close">&times;</button>
+      </div>
+      <div class="page4-popup" id="popVisite" style="left:0; top:425.709px; width:604.276px; height:382.297px; background-image:url('assets/page4/page4-visite.png');">
+        <button class="popup-close">&times;</button>
+      </div>
+    </div>
+
+    <div class="page static-page" id="page5" style="background-image: url('assets/page5/page5.png');"></div>
+
+    <div class="page" id="page6">
+      <div class="page6-bg">
+        <!-- Zones hover avec images couleur -->
+        <div class="hover-zone" data-popup="popSiecle" style="left:36px; top:182.953px;"></div>
+        <img src="assets/page6/siecle.png" class="hover-image" style="left:36px; top:182.953px;">
+        
+        <div class="hover-zone" data-popup="popFamilial" style="left:426.565px; top:182.953px;"></div>
+        <img src="assets/page6/familial.png" class="hover-image" style="left:426.565px; top:182.953px;">
+        
+        <div class="hover-zone" data-popup="popAmbition" style="left:811.855px; top:182.953px;"></div>
+        <img src="assets/page6/ambition.png" class="hover-image" style="left:811.855px; top:182.953px;">
+        
+        <div class="hover-zone" data-popup="popStade" style="left:214.196px; top:449.291px;"></div>
+        <img src="assets/page6/stade.png" class="hover-image" style="left:214.196px; top:449.291px;">
+        
+        <div class="hover-zone" data-popup="popBar" style="left:633.108px; top:449.291px;"></div>
+        <img src="assets/page6/bar.png" class="hover-image" style="left:633.108px; top:449.291px;">
+
+        <!-- Popups -->
+        <div class="page6-popup" id="popSiecle" style="left:0; top:155px; width:1190.552px; height:280px;">
+          <img src="assets/page6/siecle-popup.png">
+          <button class="popup-close">&times;</button>
+        </div>
+        <div class="page6-popup" id="popFamilial" style="left:0; top:155px; width:1190.552px; height:280px;">
+          <img src="assets/page6/familial-popup.png">
+          <button class="popup-close">&times;</button>
+        </div>
+        <div class="page6-popup" id="popAmbition" style="left:0; top:155px; width:1190.552px; height:280px;">
+          <img src="assets/page6/ambition-popup.png">
+          <button class="popup-close">&times;</button>
+        </div>
+        <div class="page6-popup" id="popStade" style="left:0; top:427.811px; width:1189.052px; height:256px;">
+          <img src="assets/page6/stade-popup.png">
+          <button class="popup-close">&times;</button>
+        </div>
+        <div class="page6-popup" id="popBar" style="left:0; top:427.811px; width:1189.052px; height:256px;">
+          <img src="assets/page6/bar-popup.png">
+          <button class="popup-close">&times;</button>
+        </div>
+
+        <a href="https://youtube.com" target="_blank" class="popup-button" id="ytBtn" style="top:612.921px; left:992.881px; width:161.671px; height:45.026px; pointer-events:none; opacity:0;"></a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="nav-controls">
+    <button class="nav-btn nav-prev" id="prevBtn">←</button>
+    <button class="nav-btn nav-next" id="nextBtn">→</button>
+  </div>
+  <div class="page-indicator" id="indicator">Page 1/6</div>
+</div>
+
+<script>
+let cur = 1;
+const total = 6;
+const pages = document.querySelectorAll('.page');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const ind = document.getElementById('indicator');
+const loader = document.getElementById('globalLoader');
+
+// Préchargement des images Page 6 pour éviter les flashs
+const p6Images = [
+  'assets/page6/page6.png',
+  'assets/page6/siecle.png',
+  'assets/page6/familial.png',
+  'assets/page6/ambition.png',
+  'assets/page6/stade.png',
+  'assets/page6/bar.png',
+  'assets/page6/siecle-popup.png',
+  'assets/page6/familial-popup.png',
+  'assets/page6/ambition-popup.png',
+  'assets/page6/stade-popup.png',
+  'assets/page6/bar-popup.png'
+];
+let p6Ready = false;
+let p6LoadedCount = 0;
+p6Images.forEach(src => {
+  const img = new Image();
+  img.onload = () => {
+    p6LoadedCount++;
+    if (p6LoadedCount === p6Images.length) {
+      p6Ready = true;
+      console.log('✅ Page 6 images préchargées');
+    }
+  };
+  img.onerror = () => {
+    p6LoadedCount++;
+    console.warn('⚠️ Erreur chargement:', src);
+    if (p6LoadedCount === p6Images.length) {
+      p6Ready = true;
+    }
+  };
+  img.src = src;
+});
+
+// Préchargement simplifié sans blocage
+setTimeout(() => loader.classList.add('hidden'), 1500);
+
+function closeAllPagePopups() {
+  // Page 2
+  p2p.classList.remove('active');
+  p2o.classList.remove('active');
+  
+  // Page 3
+  document.querySelectorAll('.page3-popup').forEach(p => p.classList.remove('active'));
+  pts.forEach(p => p.classList.remove('active'));
+  cols.forEach(c => c.querySelector('img').style.filter = 'none');
+  
+  // Page 4
+  p4o.classList.remove('active');
+  document.querySelectorAll('.page4-popup').forEach(p => p.classList.remove('active'));
+  
+  // Page 6
+  document.querySelectorAll('.page6-popup').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  ytBtn.style.pointerEvents = 'none';
+  ytBtn.style.opacity = '0';
+}
+
+function go(n) {
+  if (n < 1 || n > total) return;
+  
+  // Fermer tous les popups avant de changer de page
+  closeAllPagePopups();
+  
+  pages.forEach((p, i) => {
+    p.classList.remove('active', 'prev', 'next');
+    if (i + 1 === n) p.classList.add('active');
+    else if (i + 1 < n) p.classList.add('prev');
+    else p.classList.add('next');
+  });
+  cur = n;
+  ind.textContent = `Page ${cur}/6`;
+  prevBtn.disabled = cur === 1;
+  nextBtn.disabled = cur === total;
+}
+
+prevBtn.onclick = () => go(cur - 1);
+nextBtn.onclick = () => go(cur + 1);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft') go(cur - 1);
+  if (e.key === 'ArrowRight') go(cur + 1);
+});
+
+// PAGE 2
+const p2h = document.getElementById('p2Hotspot');
+const p2p = document.getElementById('p2Popup');
+const p2o = document.getElementById('p2Overlay');
+p2h.onclick = () => { p2p.classList.add('active'); p2o.classList.add('active'); };
+p2p.querySelector('.popup-close').onclick = () => { p2p.classList.remove('active'); p2o.classList.remove('active'); };
+// Clic en dehors pour fermer
+p2o.onclick = () => { p2p.classList.remove('active'); p2o.classList.remove('active'); };
+document.getElementById('page2').addEventListener('click', e => {
+  if (p2p.classList.contains('active') && !p2p.contains(e.target) && !p2h.contains(e.target)) {
+    p2p.classList.remove('active');
+    p2o.classList.remove('active');
+  }
+});
+
+// PAGE 3
+const cols = document.querySelectorAll('.column-wrapper');
+const pts = document.querySelectorAll('.point');
+
+// Hover sur les colonnes
+cols.forEach(col => {
+  col.onmouseenter = e => {
+    if (!e.target.classList.contains('point')) {
+      cols.forEach(c => c.querySelector('img').style.filter = c.id === col.id ? 'none' : 'grayscale(100%) brightness(95%)');
+    }
+  };
+  col.onmouseleave = () => cols.forEach(c => c.querySelector('img').style.filter = 'none');
+});
+
+// Hover et clic sur les points
+pts.forEach(pt => {
+  pt.onmouseenter = () => {
+    const cid = pt.getAttribute('data-col');
+    cols.forEach(c => c.querySelector('img').style.filter = c.id === cid ? 'none' : 'grayscale(100%) brightness(95%)');
+    if (pt.classList.contains('yellow')) {
+      const r = pt.getBoundingClientRect();
+      const cr = document.querySelector('.page3-container').getBoundingClientRect();
+      const cx = r.left - cr.left + r.width / 2;
+      const cy = r.top - cr.top + r.height / 2;
+      for (let i = 0; i < 6; i++) {
+        const cf = document.createElement('div');
+        cf.className = 'confetti';
+        cf.style.left = cx + 'px';
+        cf.style.top = cy + 'px';
+        cf.style.setProperty('--random-x', (Math.random() - 0.5) * 80 + 'px');
+        cf.style.animationDelay = (i * 0.1) + 's';
+        document.querySelector('.page3-container').appendChild(cf);
+        setTimeout(() => cf.remove(), 1600);
+      }
+    }
+  };
+  pt.onmouseleave = () => cols.forEach(c => c.querySelector('img').style.filter = 'none');
+  pt.onclick = e => {
+    e.stopPropagation();
+    const pid = pt.getAttribute('data-popup');
+    const pop = document.getElementById(pid);
+    if (pop) {
+      document.querySelectorAll('.page3-popup').forEach(p => p.classList.remove('active'));
+      pts.forEach(p => p.classList.remove('active'));
+      pop.classList.add('active');
+      pt.classList.add('active');
+    }
+  };
+});
+
+// Fermeture des popups page 3
+document.querySelectorAll('.page3-popup .popup-close').forEach(btn => {
+  btn.onclick = e => {
+    e.stopPropagation();
+    document.querySelectorAll('.page3-popup').forEach(p => p.classList.remove('active'));
+    pts.forEach(p => p.classList.remove('active'));
+    cols.forEach(c => c.querySelector('img').style.filter = 'none');
+  };
+});
+
+// Clic en dehors pour fermer page 3
+document.getElementById('page3').addEventListener('click', e => {
+  const hasActivePopup = Array.from(document.querySelectorAll('.page3-popup')).some(p => p.classList.contains('active'));
+  if (hasActivePopup && !e.target.closest('.page3-popup') && !e.target.classList.contains('point')) {
+    document.querySelectorAll('.page3-popup').forEach(p => p.classList.remove('active'));
+    pts.forEach(p => p.classList.remove('active'));
+    cols.forEach(c => c.querySelector('img').style.filter = 'none');
+  }
+});
+
+// PAGE 4
+const p4o = document.getElementById('p4Overlay');
+document.getElementById('btnDb').onclick = () => {
+  p4o.classList.add('active');
+  document.getElementById('popDb').classList.add('active');
+};
+document.getElementById('btnVisite').onclick = () => {
+  p4o.classList.add('active');
+  document.getElementById('popVisite').classList.add('active');
+};
+document.querySelectorAll('.page4-popup .popup-close').forEach(btn => {
+  btn.onclick = () => {
+    p4o.classList.remove('active');
+    document.querySelectorAll('.page4-popup').forEach(p => p.classList.remove('active'));
+  };
+});
+// Clic en dehors pour fermer page 4
+p4o.onclick = () => {
+  p4o.classList.remove('active');
+  document.querySelectorAll('.page4-popup').forEach(p => p.classList.remove('active'));
+};
+document.getElementById('page4').addEventListener('click', e => {
+  const hasActivePopup = Array.from(document.querySelectorAll('.page4-popup')).some(p => p.classList.contains('active'));
+  if (hasActivePopup && !e.target.closest('.page4-popup') && !e.target.classList.contains('invisible-btn')) {
+    p4o.classList.remove('active');
+    document.querySelectorAll('.page4-popup').forEach(p => p.classList.remove('active'));
+  }
+});
+
+// PAGE 6
+const ytBtn = document.getElementById('ytBtn');
+document.querySelectorAll('.hover-zone').forEach(z => {
+  const pid = z.getAttribute('data-popup');
+  const pop = document.getElementById(pid);
+  
+  z.onclick = e => {
+    e.stopPropagation();
+    
+    // Fermer tous les autres popups
+    document.querySelectorAll('.page6-popup').forEach(p => {
+      if (p.id !== pid) {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      }
+    });
+    
+    // Ouvrir le popup cliqué
+    pop.classList.add('active');
+    pop.style.display = 'block';
+    
+    // Activer le bouton YouTube uniquement si c'est le popup "bar"
+    if (pid === 'popBar') { 
+      ytBtn.style.pointerEvents = 'auto'; 
+      ytBtn.style.opacity = '1'; 
+    } else {
+      ytBtn.style.pointerEvents = 'none';
+      ytBtn.style.opacity = '0';
+    }
+  };
+});
+
+// Fermeture via croix
+document.querySelectorAll('.page6-popup .popup-close').forEach(btn => {
+  btn.onclick = e => {
+    e.stopPropagation();
+    btn.parentElement.classList.remove('active');
+    btn.parentElement.style.display = 'none';
+    ytBtn.style.pointerEvents = 'none';
+    ytBtn.style.opacity = '0';
+  };
+});
+
+// Clic en dehors pour fermer page 6
+document.getElementById('page6').addEventListener('click', e => {
+  const hasActivePopup = Array.from(document.querySelectorAll('.page6-popup')).some(p => p.classList.contains('active'));
+  
+  if (hasActivePopup) {
+    const clickedPopup = e.target.closest('.page6-popup');
+    const clickedButton = e.target.closest('.popup-button');
+    const clickedClose = e.target.closest('.popup-close');
+    
+    // Fermer si on clique en dehors du popup (sauf sur le bouton YouTube ou la croix)
+    if (!clickedPopup && !clickedButton && !clickedClose) {
+      document.querySelectorAll('.page6-popup').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
+      ytBtn.style.pointerEvents = 'none';
+      ytBtn.style.opacity = '0';
+    }
+  }
+});
+</script>
+</body>
+</html>
